@@ -8,7 +8,7 @@
 import Foundation
 
 // GitHubユーザーのデータを格納するModel
-struct User {
+struct User: Decodable {
     // ユーザー名
     var name: String
     // ユーザーのプロフィール画像

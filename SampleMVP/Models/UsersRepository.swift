@@ -8,7 +8,7 @@
 import Foundation
 
 // GitHubユーザーのリポジトリデータを格納するModel
-struct UsersRepository {
+struct UsersRepository: Decodable {
     // リポジトリ名
     var name: String
     // リポジトリの説明文
