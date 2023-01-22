@@ -19,78 +19,72 @@ enum TypeOfFetch: String {
 }
 
 final class API {
-    // レスポンスデータをUserRepository用にdecode(パース)する処理を実行
-    func decodeGitHubUsersRepositoryData(typeOfFetch: TypeOfFetch, userName: String, completion: @escaping (Result<UsersRepository, Error>) -> Void) {
-        fetchGitHubData(typeOfFetch: typeOfFetch, userName: userName, completion: { result in
+    // 取得したポケモンのデータをSwiftの型として扱う為にデコード
+    func decodePokemonData(completion: @escaping (Result<[Pokemon], Error>) -> Void) {
+        // データの取得を実行
+        fetchPokemonData(completion: { result in
             switch result {
-            case .success(let data):
-                do {
-                    // デコード処理
-                    let usersRepository = try JSONDecoder().decode(UsersRepository.self, from: data)
-                    completion(.success((usersRepository)))
-                } catch {
-                    completion(.failure(error))
+            case .success(let dataArray):
+                var pokemons: [Pokemon] = []
+                dataArray.forEach {
+                    do {
+                        let pokemon = try JSONDecoder().decode(Pokemon.self, from: $0)
+                        pokemons.append(pokemon)
+                    } catch {
+                        completion(.failure(error))
+                    }
                 }
+                completion(.success(pokemons))
             case .failure(let error):
                 completion(.failure(error))
             }
         })
     }
+    // データを取得
+    private func fetchPokemonData(completion: @escaping (Result<[Data], Error>) -> Void) {
+        // D＆P世代までの全ポケモン493体分のデータのURLを取得
+        let pokemonIDRange = 1...493
+        let stringURLs = getURLs(range: pokemonIDRange)
 
-    // レスポンスデータをUserModel用にdecode(パース)する処理を実行
-    func decodeGitHubUserData(typeOfFetch: TypeOfFetch, userName: String, completion: @escaping (Result<User, Error>) -> Void) {
-        fetchGitHubData(typeOfFetch: typeOfFetch, userName: userName, completion: { result in
-            switch result {
-            case .success(let data):
-                do {
-                    // デコード処理
-                    let user = try JSONDecoder().decode(User.self, from: data)
-                    completion(.success((user)))
-                } catch {
-                    completion(.failure(error))
+        // 取得したURLをString型からURL型に変換
+        let urls = stringURLs.map { URL(string: $0) }
+
+        // 取得したデータを格納する配列を定義
+        var dataArray: [Data] = []
+
+
+        urls.forEach {
+            guard let url = $0 else {
+                completion(.failure(APIError.invalidURL))
+                return
+            }
+            // タスクをセット
+            let task = URLSession.shared.dataTask(with: url) { data, response, error in
+                //　エラーが発生した場合はエラーを出力
+                if let error = error {
+                    print(error)
+                    return
                 }
-            case .failure(let error):
-                completion(.failure(error))
+                // データをdataArrayに追加
+                if let data = data {
+                    dataArray.append(data)
+                }
+                // 全てのデータをdataArrayに格納した場合、引数クロージャにdataArrayを渡して実行
+                if urls.count == dataArray.count {
+                    completion(.success(dataArray))
+                }
             }
-        })
+            // 通信を実行
+            task.resume()
+        }
     }
 
-    // API通信を実行
-    private func fetchGitHubData(typeOfFetch: TypeOfFetch, userName: String, completion: @escaping (Result<Data, Error>) -> Void) {
-
-        // 指定したcaseに適したString型のURLを取得
-        let stringURL = switchURLFromTypeOfFetch(typeOfFetch: typeOfFetch, userName: userName)
-
-        // RequestURLを作成
-        guard let requestURL = URL(string: stringURL) else {
-            // URLが無効だった場合Errorを渡してクロージャを実行
-            completion(.failure(APIError.invalidURL))
-            return
+    // D＆P世代までの全ポケモン493体分のデータのURLを取得
+    private func getURLs(range: ClosedRange<Int>) -> [String] {
+        let urls: [String] = range.map {
+            let url = "https://pokeapi.co/api/v2/pokemon/\($0)/"
+            return url
         }
-
-        // taskを作成
-        let task = URLSession.shared.dataTask(with: requestURL, completionHandler: { data, _, error in
-            if let error = error {
-                completion(.failure(error))
-            }
-            guard let data = data else { return }
-            completion(.success(data))
-            }
-        )
-        // 通信を実行
-        task.resume()
-    }
-
-
-    // Fetchする型ごとに通信の際に使用するリクエストURLを切り分ける
-    private func switchURLFromTypeOfFetch(typeOfFetch: TypeOfFetch, userName: String) -> String {
-        let url: String
-
-        switch typeOfFetch {
-        case .userData: url = "https://api.github.com/users/\(userName)"
-        case .repositoryData: url = "https://api.github.com/users/\(userName)/repos"
-        }
-
-        return url
+        return urls
     }
 }
