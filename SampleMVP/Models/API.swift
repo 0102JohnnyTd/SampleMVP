@@ -18,7 +18,11 @@ enum TypeOfFetch: String {
     case repositoryData
 }
 
-final class API {
+protocol APIInput {
+    func decodePokemonData(completion: @escaping (Result<[Pokemon], Error>) -> Void)
+}
+
+final class API: APIInput {
     // 取得したポケモンのデータをSwiftの型として扱う為にデコード
     func decodePokemonData(completion: @escaping (Result<[Pokemon], Error>) -> Void) {
         // データの取得を実行
