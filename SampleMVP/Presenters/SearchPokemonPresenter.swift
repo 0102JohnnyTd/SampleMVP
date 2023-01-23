@@ -9,6 +9,7 @@ import Foundation
 // ViewからPresenterに処理を依頼する際の処理
 protocol SearchPokemonPresenterInput {
     var numberOfPokemons: Int { get }
+    func fetchPokemonData()
     func pokemon(forRow row: Int) ->Pokemon?
     func didSelectRow(at indexPath: IndexPath)
     func didTapSearchButton(text: String?)
@@ -26,14 +27,13 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
     // API通信で取得したデータをパースした値を格納する配列を定義
     private(set) var pokemons: [Pokemon] = []
 
+    var filteredPokemons: [Pokemon] = []
 
     // View側でこちらのprotocolに準拠させることでこちらでdelegagteメソッド実行時、view側に処理を依頼できる。
     private weak var view: SearchPokemonPresenterOutPut!
 
-    // 🍎なぜModelの直接Modelインスタンスを生成せず、Protocolを型に指定するのか。
     private var api: APIInput
 
-    // 🍎このイニシャライザ、Controller側では呼ばれてなくて、別物が用意されてた。何のためのイニシャライザ？
     init(view: SearchPokemonPresenterOutPut, api: APIInput) {
         self.view = view
         self.api = api
@@ -53,12 +53,8 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         view.transitionToRepositoryList(PokemonName: pokemon.name)
     }
 
-    func didTapSearchButton(text: String?) {
-        guard let query = text else { return }
-        guard !query.isEmpty else { return }
-
-
-        api.decodePokemonData(competion: { [weak self] result in
+    func fetchPokemonData() {
+        api.decodePokemonData(completion: { [weak self] result in
             switch result {
             case .success(let pokemons):
                 self?.pokemons = pokemons
@@ -70,5 +66,10 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
                 self?.view.showErrorAlert(error)
             }
         })
+    }
+
+    func didTapSearchButton(text: String?) {
+        guard let query = text else { return }
+        guard !query.isEmpty else { return }
     }
 }
