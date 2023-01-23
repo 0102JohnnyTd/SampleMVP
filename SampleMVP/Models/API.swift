@@ -56,7 +56,6 @@ final class API: APIInput {
         // 取得したデータを格納する配列を定義
         var dataArray: [Data] = []
 
-
         urls.forEach {
             guard let url = $0 else {
                 completion(.failure(APIError.invalidURL))
