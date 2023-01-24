@@ -17,6 +17,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let _ = (scene as? UIWindowScene) else { return }
+
+        let navigationController = UIStoryboard(name: SearchPokemonViewController.storyboradName, bundle: nil).instantiateInitialViewController() as! UINavigationController
+
+        let searchPokemonVC = navigationController.viewControllers[0] as! SearchPokemonViewController
+
+        let model = API()
+        let presenter = SearchPokemonPresenter(view: searchPokemonVC, api: model)
+        searchPokemonVC.inject(presenter: presenter)
+
+        window?.rootViewController = searchPokemonVC
+        window?.makeKeyAndVisible()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
