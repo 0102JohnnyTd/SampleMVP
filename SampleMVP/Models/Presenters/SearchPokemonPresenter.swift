@@ -11,7 +11,6 @@ protocol SearchPokemonPresenterInput {
     var numberOfPokemons: Int { get }
     func fetchPokemonData()
     func pokemon(forRow row: Int) ->Pokemon?
-    func didSelectRow(at indexPath: IndexPath)
     func didTapSearchButton(text: String?)
 }
 
@@ -19,13 +18,12 @@ protocol SearchPokemonPresenterInput {
 protocol SearchPokemonPresenterOutPut: AnyObject {
     func updatePokemons(_ pokemons: [Pokemon])
     func showErrorAlert(_ error: Error)
-    func transitionToRepositoryList(PokemonName: String)
 }
 
 // クラスファイルをInput(= ViewからPresenterに依頼された際に実行する処理のプロトコル)に準拠
 final class SearchPokemonPresenter: SearchPokemonPresenterInput {
     // API通信で取得したデータをパースした値を格納する配列を定義
-    private(set) var pokemons: [Pokemon] = []
+    var pokemons: [Pokemon] = []
 
     var filteredPokemons: [Pokemon] = []
 
@@ -46,11 +44,6 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
     func pokemon(forRow row: Int) -> Pokemon? {
         guard row < pokemons.count else { return nil }
         return pokemons[row]
-    }
-
-    func didSelectRow(at indexPath: IndexPath) {
-        guard let pokemon = pokemon(forRow: indexPath.row) else { return }
-        view.transitionToRepositoryList(PokemonName: pokemon.name)
     }
 
     func fetchPokemonData() {

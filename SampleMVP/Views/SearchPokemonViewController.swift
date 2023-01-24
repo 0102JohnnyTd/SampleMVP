@@ -7,26 +7,61 @@
 
 import UIKit
 
-class SearchPokemonViewController: UIViewController {
+final class SearchPokemonViewController: UIViewController {
     @IBOutlet private weak var searchBar: UISearchBar!
     @IBOutlet private weak var tableView: UITableView!
     @IBOutlet private weak var indicator: UIActivityIndicatorView!
-    
+
+    // PresenterはSceneDelegateにて初期化
+    var presenter: SearchPokemonPresenterInput!
+    func inject(presenter: SearchPokemonPresenterInput) {
+        self.presenter = presenter
+    }
+    // ハードコーディング対策
+    static let storyboradName = "SearchPokemon"
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        presenter.fetchPokemonData()
+        setUpTableView()
     }
-    
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    // 登録処理
+    private func setUpTableView() {
+        tableView.dataSource = self
+        tableView.register(PokemonCell.nib, forCellReuseIdentifier: PokemonCell.identifier)
     }
-    */
+}
 
+// SearchBarの検索ボタンタップ時に実行
+extension SearchPokemonViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        presenter.didTapSearchButton(text: searchBar.text)
+    }
+}
+
+// TableViewのDataSource周りの処理
+extension SearchPokemonViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        presenter.numberOfPokemons
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: PokemonCell.identifier, for: indexPath) as! PokemonCell
+
+        if let pokemon = presenter.pokemon(forRow: indexPath.row) {
+            cell.configure(pokemon: pokemon)
+        }
+        return cell
+    }
+}
+
+// Presenterから指示を受けた際に実行される処理
+extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
+    func updatePokemons(_ pokemons: [Pokemon]) {
+        tableView.reloadData()
+    }
+    func showErrorAlert(_ error: Error) {
+        // エラーアラート処理を実装
+    }
 }
