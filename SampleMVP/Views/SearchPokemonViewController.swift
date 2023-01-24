@@ -28,6 +28,7 @@ final class SearchPokemonViewController: UIViewController {
 
     // 登録処理
     private func setUpTableView() {
+        tableView.delegate = self
         tableView.dataSource = self
         tableView.register(PokemonCell.nib, forCellReuseIdentifier: PokemonCell.identifier)
     }
@@ -37,6 +38,13 @@ final class SearchPokemonViewController: UIViewController {
 extension SearchPokemonViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         presenter.didTapSearchButton(text: searchBar.text)
+    }
+}
+
+extension SearchPokemonViewController: UITableViewDelegate {
+    // Cellの高さを150で固定
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        150
     }
 }
 
