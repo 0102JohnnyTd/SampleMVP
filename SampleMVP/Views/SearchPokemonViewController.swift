@@ -58,7 +58,16 @@ extension SearchPokemonViewController: UITableViewDataSource {
 
 // Presenterから指示を受けた際に実行される処理
 extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
+    func startIndicator() {
+        view.alpha = 0.5
+        indicator.startAnimating()
+    }
+    
     func updatePokemons(_ pokemons: [Pokemon]) {
+        indicator.stopAnimating()
+        indicator.isHidden = true
+        view.alpha = 1.0
+
         tableView.reloadData()
     }
     func showErrorAlert(_ error: Error) {

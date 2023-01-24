@@ -16,6 +16,7 @@ protocol SearchPokemonPresenterInput {
 
 // PresenterからViewに描画を実行するよう指示する際の処理
 protocol SearchPokemonPresenterOutPut: AnyObject {
+    func startIndicator()
     func updatePokemons(_ pokemons: [Pokemon])
     func showErrorAlert(_ error: Error)
 }
@@ -47,6 +48,7 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
     }
 
     func fetchPokemonData() {
+        view.startIndicator()
         api.decodePokemonData(completion: { [weak self] result in
             switch result {
             case .success(let pokemons):
