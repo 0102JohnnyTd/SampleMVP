@@ -71,7 +71,7 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
         indicator.startAnimating()
     }
     
-    func updatePokemons(_ pokemons: [Pokemon]) {
+    func updatePokemons(_ pokemons: [Pokemon]) {filteredPokemons.sort { $0.id < $1.id }
         indicator.stopAnimating()
         indicator.isHidden = true
         view.alpha = 1.0
