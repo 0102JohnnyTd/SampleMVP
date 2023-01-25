@@ -12,6 +12,7 @@ protocol SearchPokemonPresenterInput {
     func fetchPokemonData()
     func pokemon(forRow row: Int) ->Pokemon?
     func didTapSearchButton(text: String?)
+    func textDidChenge(text: String?)
 }
 
 // PresenterからViewに描画を実行するよう指示する際の処理
@@ -89,5 +90,16 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         }
         // ViewにTableを更新する描画を指示
         view.updatePokemons(filteredPokemons)
+    }
+
+    func textDidChenge(text: String?) {
+        guard let query = text else {
+            return
+        }
+        if query.isEmpty {
+            filteredPokemons = pokemons
+            filteredPokemons.sort { $0.id < $1.id }
+            view.updatePokemons(filteredPokemons)
+        }
     }
 }

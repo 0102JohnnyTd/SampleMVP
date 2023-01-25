@@ -23,6 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let searchPokemonVC = navigationController.viewControllers[0] as! SearchPokemonViewController
 
         let model = API()
+        // PreseneterはViewのインスタンスを要求する為、Controllerのクラスファイルでselfを渡すわけにはいかず、SceneDelegateで処理を記述する必要がある。
         let presenter = SearchPokemonPresenter(view: searchPokemonVC, api: model)
         searchPokemonVC.inject(presenter: presenter)
 

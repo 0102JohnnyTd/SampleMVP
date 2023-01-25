@@ -34,10 +34,15 @@ final class SearchPokemonViewController: UIViewController {
     }
 }
 
-// SearchBarの検索ボタンタップ時に実行
 extension SearchPokemonViewController: UISearchBarDelegate {
+    // SearchBarの検索ボタンタップ時に実行
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         presenter.didTapSearchButton(text: searchBar.text)
+    }
+
+    // 検索バーの値が変更された時に実行
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        presenter.textDidChenge(text: searchText)
     }
 }
 
@@ -71,7 +76,7 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
         indicator.startAnimating()
     }
     
-    func updatePokemons(_ pokemons: [Pokemon]) {filteredPokemons.sort { $0.id < $1.id }
+    func updatePokemons(_ pokemons: [Pokemon]) {
         indicator.stopAnimating()
         indicator.isHidden = true
         view.alpha = 1.0
