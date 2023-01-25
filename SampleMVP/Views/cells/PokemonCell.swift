@@ -13,6 +13,9 @@ final class PokemonCell: UITableViewCell {
     @IBOutlet private weak var idLabel: UILabel!
     @IBOutlet private weak var nameLabel: UILabel!
 
+    static let nib = UINib(nibName: String(describing: PokemonCell.self), bundle: nil)
+    static let identifier = String(describing: PokemonCell.self)
+
     // 2パターン用意してみた。
     func configure(pokemon: Pokemon) {
         iconView.kf.setImage(with: URL(string: pokemon.sprites.frontImage))
