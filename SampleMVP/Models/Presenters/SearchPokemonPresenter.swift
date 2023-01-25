@@ -20,6 +20,7 @@ protocol SearchPokemonPresenterOutPut: AnyObject {
     func startIndicator()
     func updatePokemons(_ pokemons: [Pokemon])
     func showErrorAlert(_ error: Error)
+    func closeKeyboard()
 }
 
 // クラスファイルをInput(= ViewからPresenterに依頼された際に実行する処理のプロトコル)に準拠
@@ -68,6 +69,9 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
 
     // Viewで検索ボタンタップ時に呼び出される
     func didTapSearchButton(text: String?) {
+        // ViewにKeyboardを閉じる描画指示を出す
+        view.closeKeyboard()
+
         guard let query = text else {
             return
         }

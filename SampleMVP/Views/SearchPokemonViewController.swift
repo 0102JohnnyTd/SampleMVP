@@ -83,7 +83,12 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
 
         tableView.reloadData()
     }
+
     func showErrorAlert(_ error: Error) {
         // エラーアラート処理を実装
+    }
+
+    func closeKeyboard() {
+        view.endEditing(true)
     }
 }
