@@ -85,14 +85,13 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
             view.updatePokemons(filteredPokemons)
             return
         }
-
-        pokemons.forEach {
-            // 検索クエリと名前が部分一致したポケモンだけ要素として追加する
-               // 大文字検索にも対応させる為、クエリを小文字変換する処理を実装
-            if $0.name.contains(query.lowercased()) {
-                filteredPokemons.append($0)
-            }
+        // 検索クエリと名前が部分一致したポケモンだけ要素として追加する
+        let filteredArray = pokemons.filter {
+            // 大文字検索にも対応させる為、クエリを小文字変換する処理を実装
+            $0.name.contains(query.lowercased())
         }
+        filteredPokemons = filteredArray
+
         // ViewにTableを更新する描画を指示
         view.updatePokemons(filteredPokemons)
     }
