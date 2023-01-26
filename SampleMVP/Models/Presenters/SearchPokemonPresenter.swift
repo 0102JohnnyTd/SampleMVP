@@ -88,7 +88,8 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
 
         pokemons.forEach {
             // 検索クエリと名前が部分一致したポケモンだけ要素として追加する
-            if $0.name.contains(query) {
+               // 大文字検索にも対応させる為、クエリを小文字変換する処理を実装
+            if $0.name.contains(query.lowercased()) {
                 filteredPokemons.append($0)
             }
         }
