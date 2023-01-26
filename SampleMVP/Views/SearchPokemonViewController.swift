@@ -76,7 +76,7 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
         indicator.startAnimating()
     }
     
-    func updatePokemons(_ pokemons: [Pokemon]) {
+    func updatePokemons() {
         indicator.stopAnimating()
         indicator.isHidden = true
         view.alpha = 1.0
@@ -84,8 +84,14 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
         tableView.reloadData()
     }
 
-    func showErrorAlert(_ error: Error) {
-        // エラーアラート処理を実装
+    func showErrorAlert(_ message: String) {
+        let alertController = UIAlertController(title: "通信エラー", message: message, preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "閉じる", style: .cancel,  handler: { [weak self] _ in
+            self?.presenter }))
+        alertController.addAction(UIAlertAction(title: "再度試す", style: .default, handler: { [weak self] _ in
+            self?.presenter.fetchPokemonData() }))
+
+        present(alertController, animated: true)
     }
 
     func closeKeyboard() {

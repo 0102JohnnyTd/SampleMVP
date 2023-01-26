@@ -65,7 +65,7 @@ final class API: APIInput {
             let task = URLSession.shared.dataTask(with: url) { data, response, error in
                 //　エラーが発生した場合はエラーを出力
                 if let error = error {
-                    print(error)
+                    completion(.failure(error))
                     return
                 }
                 // データをdataArrayに追加

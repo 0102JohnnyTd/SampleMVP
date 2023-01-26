@@ -13,13 +13,14 @@ protocol SearchPokemonPresenterInput {
     func pokemon(forRow row: Int) ->Pokemon?
     func didTapSearchButton(text: String?)
     func textDidChenge(text: String?)
+    func didTapAlertCancelButton()
 }
 
 // PresenterからViewに描画を実行するよう指示する際の処理
 protocol SearchPokemonPresenterOutPut: AnyObject {
     func startIndicator()
-    func updatePokemons(_ pokemons: [Pokemon])
-    func showErrorAlert(_ error: Error)
+    func updatePokemons()
+    func showErrorAlert(_ message: String)
     func closeKeyboard()
 }
 
@@ -59,10 +60,15 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
                 self?.filteredPokemons.sort { $0.id < $1.id }
 
                 DispatchQueue.main.async {
-                    self?.view.updatePokemons(pokemons)
+                    self?.view.updatePokemons()
                 }
-            case .failure(let error):
-                self?.view.showErrorAlert(error)
+            case .failure(let error as URLError):
+                let errorMessage = error.message
+                DispatchQueue.main.async {
+                    self?.view.showErrorAlert(errorMessage)
+                }
+            case .failure:
+                fatalError("unexpected Errorr")
             }
         })
     }
@@ -82,7 +88,7 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         guard !query.isEmpty else {
             filteredPokemons = pokemons
             filteredPokemons.sort { $0.id < $1.id }
-            view.updatePokemons(filteredPokemons)
+            view.updatePokemons()
             return
         }
         // 検索クエリと名前が部分一致したポケモンだけ要素として追加する
@@ -93,7 +99,7 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         filteredPokemons = filteredArray
 
         // ViewにTableを更新する描画を指示
-        view.updatePokemons(filteredPokemons)
+        view.updatePokemons()
     }
 
     func textDidChenge(text: String?) {
@@ -103,7 +109,13 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         if query.isEmpty {
             filteredPokemons = pokemons
             filteredPokemons.sort { $0.id < $1.id }
-            view.updatePokemons(filteredPokemons)
+            view.updatePokemons()
+        }
+    }
+
+    func didTapAlertCancelButton() {
+        DispatchQueue.main.async { [weak self] in
+            self?.view.updatePokemons()
         }
     }
 }
