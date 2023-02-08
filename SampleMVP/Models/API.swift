@@ -44,6 +44,7 @@ final class API: APIInput {
             }
         })
     }
+
     // データを取得
     private func fetchPokemonData(completion: @escaping (Result<[Data], Error>) -> Void) {
         // D＆P世代までの全ポケモン493体分のデータのURLを取得

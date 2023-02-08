@@ -22,7 +22,7 @@ final class SearchPokemonViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        presenter.fetchPokemonData()
+        presenter.viewdidLoad()
         setUpTableView()
     }
 
@@ -85,13 +85,21 @@ extension SearchPokemonViewController: SearchPokemonPresenterOutPut {
     }
 
     func showErrorAlert(_ message: String) {
-        let alertController = UIAlertController(title: "通信エラー", message: message, preferredStyle: .alert)
-        alertController.addAction(UIAlertAction(title: "閉じる", style: .cancel,  handler: { [weak self] _ in
-            self?.presenter }))
-        alertController.addAction(UIAlertAction(title: "再度試す", style: .default, handler: { [weak self] _ in
-            self?.presenter.fetchPokemonData() }))
+        // falseならAlertの生成及び表示処理を実行しないようにする。
+        if presenter.isContinueState {
+            // 設計上これでは良くないが、presentが呼ばれるよりも先にisContinueStateをfalseにする方法が現状これしか見出せなかっ為この実装にしている
+            presenter.isContinueState = false
 
-        present(alertController, animated: true)
+            let alertController = UIAlertController(title: "通信エラー", message: message, preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "閉じる", style: .cancel, handler: { [weak self] _ in
+                self?.presenter.didTapAlertCancelButton()
+            }))
+            alertController.addAction(UIAlertAction(title: "再度試す", style: .default, handler: { [weak self] _ in
+                self?.presenter.fetchPokemonData() }))
+
+            present(alertController, animated: true)
+            print("presentが呼ばれたわず。")
+        }
     }
 
     func closeKeyboard() {

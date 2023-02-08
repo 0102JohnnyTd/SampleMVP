@@ -8,7 +8,9 @@ import Foundation
 
 // ViewからPresenterに処理を依頼する際の処理
 protocol SearchPokemonPresenterInput {
+    var isContinueState: Bool { get set }
     var numberOfPokemons: Int { get }
+    func viewdidLoad()
     func fetchPokemonData()
     func pokemon(forRow row: Int) ->Pokemon?
     func didTapSearchButton(text: String?)
@@ -33,7 +35,6 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
 
     // View側でこちらのprotocolに準拠させることでこちらでdelegagteメソッド実行時、view側に処理を依頼できる。
     private weak var view: SearchPokemonPresenterOutPut!
-
     private var api: APIInput
 
     init(view: SearchPokemonPresenterOutPut, api: APIInput) {
@@ -45,11 +46,48 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
         filteredPokemons.count
     }
 
+    // 配列要素のいずれかURLで通信処理が失敗した場合、それ以降の通信をキャンセルするか否かを決める為のBool値
+    var isContinueState: Bool {
+        get {
+            isContinue
+        }
+        set(newValue) {
+            isContinue = newValue
+        }
+    }
+
+    var isContinue = true
+
     func pokemon(forRow row: Int) -> Pokemon? {
         guard row < filteredPokemons.count else { return nil }
         return filteredPokemons[row]
     }
 
+    // アプリ起動時にViewから依頼される
+    func viewdidLoad() {
+        view.startIndicator()
+        api.decodePokemonData(completion: { [weak self] result in
+            switch result {
+            case .success(let pokemons):
+                self?.pokemons = pokemons
+                self?.filteredPokemons = pokemons
+                self?.filteredPokemons.sort { $0.id < $1.id }
+
+                DispatchQueue.main.async {
+                    self?.view.updatePokemons()
+                }
+            case .failure(let error as URLError):
+                let errorMessage = error.message
+                DispatchQueue.main.async {
+                    self?.view.showErrorAlert(errorMessage)
+                }
+            case .failure:
+                fatalError("unexpected Errorr")
+            }
+        })
+    }
+
+    // 通信エラーを通知するAlertのボタンタップ時に実行される処理
     func fetchPokemonData() {
         view.startIndicator()
         api.decodePokemonData(completion: { [weak self] result in
@@ -115,6 +153,8 @@ final class SearchPokemonPresenter: SearchPokemonPresenterInput {
 
     func didTapAlertCancelButton() {
         DispatchQueue.main.async { [weak self] in
+            // 本来はアーキテクチャの観点でこのタイミングでBool値を切り替えるべきだが、このやり方だとAlertが2回出てしまうので今は一旦コメントアウト
+//            self?.isContinue = false
             self?.view.updatePokemons()
         }
     }
